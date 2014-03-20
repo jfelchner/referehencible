@@ -1,4 +1,5 @@
 require 'referehencible/version'
+require 'securerandom'
 
 module Referehencible
   def self.included(base)
