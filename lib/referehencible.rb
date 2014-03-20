@@ -28,6 +28,6 @@ module Referehencible
 
 private
   def generate_guid
-    read_attribute(:guid) || write_attribute('guid', SecureRandom.hex(8))
+    read_attribute(:guid) || write_attribute('guid', SecureRandom.hex(16))
   end
 end
