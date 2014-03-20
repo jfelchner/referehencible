@@ -22,10 +22,8 @@ Gem::Specification.new do |s|
   s.rdoc_options          = ["--charset = UTF-8"]
   s.extra_rdoc_files      = %w[README.md LICENSE]
 
-  #= Manifest =#
   s.executables           = Dir["{bin}/**/*"]
   s.files                 = Dir["{app,config,db,lib}/**/*"] + %w{Rakefile README.md}
   s.test_files            = Dir["{test,spec,features}/**/*"]
   s.require_paths         = ["lib"]
-  #= Manifest =#
 end
