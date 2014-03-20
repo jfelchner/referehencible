@@ -9,6 +9,8 @@ module Referehencible
       validates       :guid,
                         presence:         true,
                         uniqueness:       true,
+                        format:           {
+                          with:             /[a-f0-9]{32}/ },
                         length:           {
                           is:               16 }
 
