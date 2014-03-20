@@ -6,7 +6,7 @@ module Referehencible
       ###
       # Validations
       #
-      validates       :reference_number,
+      validates       :guid,
                         presence:         true,
                         uniqueness:       true,
                         length:           {
@@ -15,17 +15,17 @@ module Referehencible
       ###
       # Hooks
       #
-      before_create   :generate_reference_number
+      before_create   :generate_guid
 
       ###
       # ActiveRecord Overrides
       #
-      def reference_number; generate_reference_number; end
+      def guid; generate_guid; end
     end
   end
 
 private
-  def generate_reference_number
-    read_attribute(:reference_number) || write_attribute('reference_number', SecureRandom.hex(8))
+  def generate_guid
+    read_attribute(:guid) || write_attribute('guid', SecureRandom.hex(8))
   end
 end
