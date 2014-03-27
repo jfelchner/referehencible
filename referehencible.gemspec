@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
 
   s.authors               = %w{jfelchner m5rk}
   s.email                 = 'support@chirrpy.com'
-  s.date                  = Date.today
+  s.date                  = Time.now
   s.homepage              = 'https://github.com/chirrpy/referehencible'
 
   s.summary               = %q{Enable unique reference numbers on all the things}
