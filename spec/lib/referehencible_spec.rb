@@ -1,8 +1,6 @@
 require 'rspectacular'
-require 'referehencible'
 
 class Referenced
-  include Referehencible
 end
 
 # describe  Referehencible do

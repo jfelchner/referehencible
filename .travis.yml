@@ -1,0 +1,15 @@
+language: ruby
+rvm:
+  - 1.9.2
+  - 1.9.3
+  - 2.0.0
+  - 2.1.0
+  - jruby-19mode
+script: bundle exec rspec spec
+env:
+  global:
+    secure: cE4cb6OwOBoPOrHgLHgc9W3hPP5iSSGPdtj+akK39XpEfyiyxRU+5H6G+lzXrqmoSHrdZI9rh+xdlltwAPPMjMcTBPxgIcM+rOwVV0RGhotkJHWZpXJgusxSdT1Cmi854e4ytZTCDDP5KoSdqj+QdbzEP5gE1RsbXBIiUutzxGs=
+notifications:
+  slack:
+    rooms:
+    - thekompanee:p46x27zMG89XW66DgGuutoaW#open-source
