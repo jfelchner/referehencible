@@ -13,7 +13,7 @@ module Referehencible
                         format:           {
                           with:             /[a-f0-9]{32}/ },
                         length:           {
-                          is:               16 }
+                          is:               32 }
 
       ###
       # Hooks
