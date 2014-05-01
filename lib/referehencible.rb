@@ -29,7 +29,7 @@ module Referehencible
       private
 
       define_method(:generate_guid) do |reference_attribute|
-        read_attribute(reference_attribute) || write_attribute(reference_attribute, SecureRandom.hex(16))
+        read_attribute(reference_attribute) || write_attribute(reference_attribute, Referehencible.reference_number)
       end
 
       define_singleton_method(:unknown_reference_object) do
@@ -42,5 +42,9 @@ module Referehencible
 
   def self.included(base)
     base.extend ClassMethods
+  end
+
+  def self.reference_number
+    SecureRandom.hex(16)
   end
 end
