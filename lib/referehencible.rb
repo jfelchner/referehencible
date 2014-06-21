@@ -2,19 +2,35 @@ require 'referehencible/version'
 require 'securerandom'
 
 module Referehencible
+  DEFAULT_LENGTH = 32
+
   module ClassMethods
     def referenced_by(*referenced_attributes)
-      referenced_attributes.each do |reference_attribute|
+      default_options = { length: DEFAULT_LENGTH }
+
+      referenced_attributes = referenced_attributes.each_with_object({}) do |referenced_attribute, transformed_attributes|
+                                case referenced_attribute
+                                when Symbol
+                                  transformed_attributes[referenced_attribute] = default_options
+                                when Hash
+                                  transformed_attributes.merge! referenced_attribute
+                                end
+                              end
+
+      referenced_attributes.each do |reference_attribute, options|
+        raise RuntimeError, "You attempted to pass in a length of #{options[:length]} for #{reference_attribute} in #{self.name}. Only even numbers are allowed." \
+          if options[:length].odd?
+
         validates       reference_attribute,
                           presence:         true,
                           uniqueness:       true,
                           format:           {
-                            with:             /[a-f0-9]{32}/ },
+                            with:             /[a-f0-9]{#{options[:length]}}/ },
                           length:           {
-                            is:               32 }
+                            is:               options[:length] }
 
         define_method(reference_attribute) do
-          generate_guid(reference_attribute)
+          generate_guid(reference_attribute, options[:length] / 2)
         end
 
         define_singleton_method("by_#{reference_attribute}") do |guid_to_find|
@@ -23,13 +39,13 @@ module Referehencible
           unknown_reference_object
         end
 
-        after_initialize lambda { generate_guid reference_attribute }
+        after_initialize lambda { generate_guid reference_attribute, options[:length] / 2 }
       end
 
       private
 
-      define_method(:generate_guid) do |reference_attribute|
-        read_attribute(reference_attribute) || write_attribute(reference_attribute, Referehencible.reference_number)
+      define_method(:generate_guid) do |reference_attribute, length|
+        read_attribute(reference_attribute) || write_attribute(reference_attribute, SecureRandom.hex(length))
       end
 
       define_singleton_method(:unknown_reference_object) do
@@ -42,9 +58,5 @@ module Referehencible
 
   def self.included(base)
     base.extend ClassMethods
-  end
-
-  def self.reference_number
-    SecureRandom.hex(16)
   end
 end
