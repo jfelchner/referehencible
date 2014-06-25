@@ -2,11 +2,14 @@ require 'referehencible/version'
 require 'securerandom'
 
 module Referehencible
-  DEFAULT_LENGTH = 32
+  DEFAULT_LENGTH = 36
 
   module ClassMethods
     def referenced_by(*referenced_attributes)
-      default_options = { length: DEFAULT_LENGTH }
+      default_options = {
+        length: DEFAULT_LENGTH,
+        type:   :uuid,
+      }
 
       referenced_attributes = referenced_attributes.each_with_object({}) do |referenced_attribute, transformed_attributes|
                                 case referenced_attribute
@@ -25,12 +28,12 @@ module Referehencible
                           presence:         true,
                           uniqueness:       true,
                           format:           {
-                            with:             /[a-f0-9]{#{options[:length]}}/ },
+                            with:             /[a-f0-9\-]{#{options[:length]}}/ },
                           length:           {
                             is:               options[:length] }
 
         define_method(reference_attribute) do
-          generate_guid(reference_attribute, options[:length] / 2)
+          send("generate_#{options[:type]}_guid", reference_attribute, options[:length] / 2)
         end
 
         define_singleton_method("by_#{reference_attribute}") do |guid_to_find|
@@ -39,13 +42,17 @@ module Referehencible
           unknown_reference_object
         end
 
-        after_initialize lambda { generate_guid reference_attribute, options[:length] / 2 }
+        after_initialize lambda { send("generate_#{options[:type]}_guid", reference_attribute, options[:length] / 2) }
       end
 
       private
 
-      define_method(:generate_guid) do |reference_attribute, length|
+      define_method(:generate_hex_guid) do |reference_attribute, length|
         read_attribute(reference_attribute) || write_attribute(reference_attribute, SecureRandom.hex(length))
+      end
+
+      define_method(:generate_uuid_guid) do |reference_attribute, length|
+        read_attribute(reference_attribute) || write_attribute(reference_attribute, SecureRandom.uuid)
       end
 
       define_singleton_method(:unknown_reference_object) do
