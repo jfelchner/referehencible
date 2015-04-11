@@ -47,11 +47,11 @@ module Referehencible
             unknown_reference_object
         end
 
-        after_initialize lambda do
+        after_initialize(lambda do
           send("generate_#{options[:type]}_guid",
                reference_attribute,
                options[:length] / 2)
-        end
+        end)
       end
 
       private
