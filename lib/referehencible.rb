@@ -60,6 +60,12 @@ module Referehencible
                         SecureRandom.hex(hex_length).slice(0, length))
       end
 
+      define_method(:generate_base64_guid) do |reference_attribute, length|
+        read_attribute(reference_attribute) ||
+        write_attribute(reference_attribute,
+                        SecureRandom.urlsafe_base64(length).slice(0, length))
+      end
+
       define_method(:generate_uuid_guid) do |reference_attribute, _length|
         read_attribute(reference_attribute) || write_attribute(reference_attribute,
                                                                SecureRandom.uuid)
