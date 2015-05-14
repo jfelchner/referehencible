@@ -39,8 +39,8 @@ module Referehencible
 
         define_singleton_method("by_#{reference_attribute}") do |guid_to_find|
           where(:"#{reference_attribute}" => guid_to_find).
-            first ||
-            unknown_reference_object
+          first ||
+          unknown_reference_object
         end
 
         after_initialize(lambda do
