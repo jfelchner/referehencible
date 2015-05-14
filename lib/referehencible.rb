@@ -23,10 +23,6 @@ module Referehencible
         end
 
       referenced_attrs.each do |reference_attribute, options|
-        fail "You attempted to pass in a length of #{options[:length]} for " \
-             "#{reference_attribute} in #{name}. Only even numbers are allowed." \
-          if options[:length].odd?
-
         validates reference_attribute,
                   presence:   true,
                   uniqueness: true,
@@ -38,7 +34,7 @@ module Referehencible
         define_method(reference_attribute) do
           send("generate_#{options[:type]}_guid",
                reference_attribute,
-               options[:length] / 2)
+               options[:length])
         end
 
         define_singleton_method("by_#{reference_attribute}") do |guid_to_find|
@@ -50,15 +46,18 @@ module Referehencible
         after_initialize(lambda do
           send("generate_#{options[:type]}_guid",
                reference_attribute,
-               options[:length] / 2)
+               options[:length])
         end)
       end
 
       private
 
       define_method(:generate_hex_guid) do |reference_attribute, length|
-        read_attribute(reference_attribute) || write_attribute(reference_attribute,
-                                                               SecureRandom.hex(length))
+        hex_length = (length / 2.0 + 1).floor
+
+        read_attribute(reference_attribute) ||
+        write_attribute(reference_attribute,
+                        SecureRandom.hex(hex_length).slice(0, length))
       end
 
       define_method(:generate_uuid_guid) do |reference_attribute, _length|
