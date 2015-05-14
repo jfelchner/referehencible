@@ -27,7 +27,7 @@ module Referehencible
                   presence:   true,
                   uniqueness: true,
                   format:     {
-                    with:             /[a-f0-9\-]{#{options[:length]}}/ },
+                    with:             /[a-zA-Z0-9\-_=]{#{options[:length]}}/ },
                   length:     {
                     is:               options[:length] }
 
