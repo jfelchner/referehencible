@@ -23,58 +23,76 @@ module Referehencible
         end
 
       referenced_attrs.each do |reference_attribute, options|
-        validates reference_attribute,
-                  presence:   true,
-                  uniqueness: true,
-                  format:     {
-                    with:             /[a-zA-Z0-9\-_=]{#{options[:length]}}/ },
-                  length:     {
-                    is:               options[:length] }
-
-        define_method(reference_attribute) do
-          send("generate_#{options[:type]}_guid",
-               reference_attribute,
-               options[:length])
+        if respond_to?(:validates)
+          validates reference_attribute,
+                    presence:   true,
+                    format:     {
+                      with:       /[a-zA-Z0-9\-_=]{#{options[:length]}}/ },
+                    length:     {
+                      is:         options[:length] }
         end
 
-        define_singleton_method("by_#{reference_attribute}") do |guid_to_find|
-          where(:"#{reference_attribute}" => guid_to_find).
-          first ||
+        define_method(reference_attribute) do
+          read_reference_attribute(reference_attribute) ||
+          write_reference_attribute(reference_attribute, send("generate_#{options[:type]}_guid", options[:length]))
+        end
+
+        define_singleton_method("for_#{reference_attribute}") do |guid_to_find|
+          where(:"#{reference_attribute}" => guid_to_find)
+        end
+
+        define_singleton_method("find_for_#{reference_attribute}") do |guid_to_find|
+          where(:"#{reference_attribute}" => guid_to_find).first ||
           unknown_reference_object
         end
 
-        after_initialize(lambda do
-          send("generate_#{options[:type]}_guid",
-               reference_attribute,
-               options[:length])
-        end)
+        if respond_to?(:after_initialize)
+          after_initialize(lambda do
+            send("generate_#{options[:type]}_guid",
+                 reference_attribute,
+                 options[:length])
+          end)
+        end
       end
 
       private
 
-      define_method(:generate_hex_guid) do |reference_attribute, length|
+      define_method(:generate_hex_guid) do |length|
         hex_length = (length / 2.0 + 1).floor
 
-        read_attribute(reference_attribute) ||
-        write_attribute(reference_attribute,
-                        SecureRandom.hex(hex_length).slice(0, length))
+        SecureRandom.hex(hex_length).slice(0, length)
       end
 
-      define_method(:generate_base64_guid) do |reference_attribute, length|
-        read_attribute(reference_attribute) ||
-        write_attribute(reference_attribute,
-                        SecureRandom.urlsafe_base64(length).slice(0, length))
+      define_method(:generate_base64_guid) do |length|
+        SecureRandom.urlsafe_base64(length).slice(0, length)
       end
 
-      define_method(:generate_uuid_guid) do |reference_attribute, _length|
-        read_attribute(reference_attribute) || write_attribute(reference_attribute,
-                                                               SecureRandom.uuid)
+      define_method(:generate_uuid_guid) do |_length|
+        SecureRandom.uuid
+      end
+
+      define_method(:read_reference_attribute) do |reference_attribute|
+        if respond_to?(:read_attribute)
+          read_attribute(reference_attribute)
+        else
+          instance_variable_get("@#{reference_attribute}")
+        end
+      end
+
+      define_method(:write_reference_attribute) do |reference_attribute, value|
+        if respond_to?(:write_attribute)
+          write_attribute(reference_attribute, value)
+        else
+          instance_variable_set("@#{reference_attribute}", value)
+        end
       end
 
       define_singleton_method(:unknown_reference_object) do
-        return new unless respond_to?(:as_null_object)
-
-        as_null_object
+        if respond_to?(:as_null_object)
+          as_null_object
+        else
+          new
+        end
       end
     end
   end
