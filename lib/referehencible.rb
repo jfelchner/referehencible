@@ -1,6 +1,9 @@
 require 'referehencible/version'
 require 'securerandom'
 
+# rubocop:disable Metrics/LineLength, Metrics/PerceivedComplexity
+# :reek:DuplicateMethodCall
+# :reek:NestedIterators
 module Referehencible
   DEFAULT_LENGTH = 36
 
@@ -12,29 +15,30 @@ module Referehencible
         type:   :uuid,
       }
 
-      referenced_attrs = \
-        referenced_attrs.each_with_object({}) do |referenced_attr, transformed_attr|
+      referenced_attrs = referenced_attrs.each_with_object({}) do |referenced_attr, transformed_attr|
           case referenced_attr
           when Symbol
             transformed_attr[referenced_attr] = default_options
           when Hash
             transformed_attr.merge! referenced_attr
           end
-        end
+      end
 
       referenced_attrs.each do |reference_attribute, options|
         if respond_to?(:validates)
           validates reference_attribute,
-                    presence:   true,
-                    format:     {
-                      with:       /[a-zA-Z0-9\-_=]{#{options[:length]}}/ },
-                    length:     {
-                      is:         options[:length] }
+                    presence: true,
+                    format:   {
+                      with: /[a-zA-Z0-9\-_=]{#{options[:length]}}/,
+                    },
+                    length:   {
+                      is: options[:length],
+                    }
         end
 
         define_method(reference_attribute) do
           read_reference_attribute(reference_attribute) ||
-          write_reference_attribute(reference_attribute, send("generate_#{options[:type]}_guid", options[:length]))
+          write_reference_attribute(reference_attribute, __send__("generate_#{options[:type]}_guid", options[:length]))
         end
 
         define_singleton_method("for_#{reference_attribute}") do |guid_to_find|
@@ -46,13 +50,12 @@ module Referehencible
           unknown_reference_object
         end
 
-        if respond_to?(:after_initialize)
-          after_initialize(lambda do
-            send("generate_#{options[:type]}_guid",
-                 reference_attribute,
-                 options[:length])
-          end)
-        end
+        next unless respond_to?(:after_initialize)
+        after_initialize(lambda do
+          __send__("generate_#{options[:type]}_guid",
+                   reference_attribute,
+                   options[:length])
+        end)
       end
 
       private
@@ -102,3 +105,4 @@ module Referehencible
     base.extend ClassMethods
   end
 end
+# rubocop:enable Metrics/LineLength, Metrics/PerceivedComplexity
