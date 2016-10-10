@@ -2,8 +2,6 @@ require 'referehencible/version'
 require 'securerandom'
 
 # rubocop:disable Metrics/LineLength, Metrics/PerceivedComplexity
-# :reek:DuplicateMethodCall
-# :reek:NestedIterators
 module Referehencible
   DEFAULT_LENGTH = 36
 
