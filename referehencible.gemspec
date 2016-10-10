@@ -22,4 +22,6 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'rspec', ["~> 3.0"]
   spec.add_development_dependency 'rspectacular', ["~> 0.45.0"]
+
+  spec.metadata['allowed_push_host'] = 'https://rubygems.org'
 end
